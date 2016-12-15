@@ -24,7 +24,7 @@ import com.google.gson.reflect.TypeToken;
 class Parser implements Interceptor {
 
 	public static class HYEvent {
-		public HashMap<String, String> headers;
+		public HashMap<String, Object> headers;
 		public String body;
 
 		public byte[] getBody() {
@@ -87,7 +87,7 @@ class Parser implements Interceptor {
 	private List<Event> getSimpleEvents(List<HYEvent> events) {
 		List<Event> newEvents = new ArrayList<Event>(events.size());
 		for (HYEvent e : events) {
-			HashMap<String, String> headers = e.headers;
+			HashMap<String, Object> headers = e.headers;
 			if (headers.containsKey("action") == false
 					|| headers.get("action") == null) {
 				LOG.error("no action in event: {}", new Gson().toJson(headers));
@@ -104,7 +104,7 @@ class Parser implements Interceptor {
 				LOG.error("UnsupportedEncodingException:{}", e1);
 			}
 			byte[] newBody = new Gson().toJson(headers).getBytes();
-			newEvents.add(EventBuilder.withBody(newBody, headers));
+			newEvents.add(EventBuilder.withBody(newBody, new HashMap<String, String>(0)));
 		}
 		return newEvents;
 	}
