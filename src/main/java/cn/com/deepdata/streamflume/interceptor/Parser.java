@@ -104,7 +104,12 @@ class Parser implements Interceptor {
 				LOG.error("UnsupportedEncodingException:{}", e1);
 			}
 			byte[] newBody = new Gson().toJson(headers).getBytes();
-			newEvents.add(EventBuilder.withBody(newBody, new HashMap<String, String>(0)));
+			if (newBody.length > 1000000) {
+				LOG.error("Message is too large.");
+				LOG.error(new Gson().toJson(headers));
+			} else {
+				newEvents.add(EventBuilder.withBody(newBody, new HashMap<String, String>(0)));
+			}
 		}
 		return newEvents;
 	}
