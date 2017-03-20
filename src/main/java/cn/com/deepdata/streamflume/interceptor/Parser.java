@@ -105,8 +105,8 @@ class Parser implements Interceptor {
 			}
 			byte[] newBody = new Gson().toJson(headers).getBytes();
 			if (newBody.length > 1000000) {
-				LOG.error("Message is too large.");
-				LOG.error(new Gson().toJson(headers));
+				LOG.error("Message is too large. length: " + newBody.length);
+				LOG.error("Message title: " + headers.get("scc_title"));
 			} else {
 				newEvents.add(EventBuilder.withBody(newBody, new HashMap<String, String>(0)));
 			}
