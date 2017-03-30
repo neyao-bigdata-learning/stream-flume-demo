@@ -23,6 +23,8 @@ import com.google.gson.reflect.TypeToken;
 
 class Parser implements Interceptor {
 
+    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
+
     public static class HYEvent {
         public HashMap<String, Object> headers;
         public String body;
@@ -61,8 +63,6 @@ class Parser implements Interceptor {
     private final Type listType = new TypeToken<ArrayList<HYEvent>>() {
     }.getType();
     private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-    ;
-    private static final Logger LOG = LoggerFactory.getLogger(Parser.class);
 
     public void close() {
         // TODO Auto-generated method stub
@@ -91,7 +91,7 @@ class Parser implements Interceptor {
             HashMap<String, Object> headers = e.headers;
             if (headers.containsKey("action") == false
                     || headers.get("action") == null) {
-                LOG.error("no action in event: {}", new Gson().toJson(headers));
+                logger.error("no action in event: {}", new Gson().toJson(headers));
                 continue;
             }
             try {
@@ -102,12 +102,12 @@ class Parser implements Interceptor {
             } catch (UnsupportedEncodingException e1) {
                 // TODO Auto-generated catch block
                 // e1.printStackTrace();
-                LOG.error("UnsupportedEncodingException:{}", e1);
+                logger.error("UnsupportedEncodingException:{}", e1);
             }
             byte[] newBody = new Gson().toJson(headers).getBytes();
             if (newBody.length > 1000000) {
-                LOG.error("Message is too large. length: " + newBody.length);
-                LOG.error("Message title: " + headers.get("scc_title"));
+                logger.error("Message is too large. length: " + newBody.length);
+                logger.error("Message title: " + headers.get("scc_title"));
             } else {
                 newEvents.add(EventBuilder.withBody(newBody, new HashMap<String, String>(0)));
             }
@@ -147,6 +147,7 @@ class Parser implements Interceptor {
                 System.arraycopy(bytes, 4, uncompress, 0, byteLen - 4);
                 json = new String(uncompress, 0, uncompress.length, "UTF-8");
             }
+            logger.debug("original request json: {}", json);
             eventList = gson.fromJson(json, listType);
             if (eventList == null || eventList.size() == 0)
                 return new ArrayList<Event>(0);
@@ -160,17 +161,17 @@ class Parser implements Interceptor {
                 contentcompresscount++;
             }
         } catch (JsonSyntaxException ex) {
-            LOG.error("JsonSyntaxException");
-            LOG.error("json:{}", json);
-            LOG.error("ex:{}", ex);
+            logger.error("JsonSyntaxException");
+            logger.error("json:{}", json);
+            logger.error("ex:{}", ex);
             List<Event> ret = new ArrayList<Event>(0);
             ret.add(ErrorEvent.Create(ex.toString(), json));
             return ret;
         } catch (UnsupportedEncodingException ex) {
             // TODO Auto-generated catch block
-            LOG.error("UnsupportedEncodingException");
-            LOG.error("json:{}", json);
-            LOG.error("ex:{}", ex);
+            logger.error("UnsupportedEncodingException");
+            logger.error("json:{}", json);
+            logger.error("ex:{}", ex);
             List<Event> ret = new ArrayList<Event>(0);
             ret.add(ErrorEvent.Create(ex.toString(), json));
             return ret;
